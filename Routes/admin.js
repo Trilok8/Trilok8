@@ -12,7 +12,8 @@ router.get('/add-product',(request,response, next) => {
     {path: '/admin/add-product',
     hasFormsCSS: true,
     hasProductCSS: true,
-    isAddProduct: true});
+    isAddProduct: true,
+    docTitle: 'add-product'});
     // response.sendFile(path.join(rootDir, 'views', 'add-product.html'));
 });
 
