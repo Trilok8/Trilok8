@@ -2,19 +2,22 @@ const Cart = require('../models/cartModel');
 const Product = require('../models/productModel');
 
 exports.getProductList = (request,response,next) => {
-    const products = Product.fetchAll(products => {
-        response.render('shop/product-list',{prods: products,
+    Product.fetchAll().then(([rows]) => {
+        response.render('shop/product-list',{prods: rows,
             docTitle: 'My Shop',
             path: '/product-list'});
     });
 };
 
 exports.getIndex = (request,response,next) => {
-    const products = Product.fetchAll(products => {
-        response.render('shop/index',{prods: products,
+    Product.fetchAll().then(([rows]) => {
+        response.render('shop/index',{prods: rows,
             docTitle: 'index',
             path: '/index'});
-    });
+    }).catch(err => console.log(err));
+
+
+    
 };
 
 exports.getCart = (request,response,next) => {
@@ -70,8 +73,7 @@ exports.getOrders = (request,response,next) => {
 
 exports.getProductDetail = (request,response,next) => {
     const prodID = request.params.productID;
-    const product = 
-    Product.findProductByID(prodID,product => {
-        response.render('shop/product-detail',{product: product,docTitle: product.title,path: product.title});
-    });
+    Product.findProductByID(prodID).then(([product]) => {
+        response.render('shop/product-detail',{product: product[0],docTitle: product.title,path: product.title});
+    }).catch(err => console.log(err));
 };

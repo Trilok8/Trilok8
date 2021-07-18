@@ -15,8 +15,9 @@ exports.postAddProduct = (request,response,next) => {
     const description = request.body.description;
     const imageSite = request.body.imageSite;
     const product = new Product(null, title,imageURL,price,description,imageSite);
-    product.save();
-    response.redirect('/');
+    product.save().then(() => {
+        response.redirect('/');
+    }).catch(err => console.log(err));
 };
 
 exports.getAdminProductList = (request,response,next) => {
