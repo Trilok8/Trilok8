@@ -2,13 +2,13 @@ const Sequelize = require('sequelize');
 
 const sequelize = require('../helpers/expressjsDatabase');
 
-const Cart = sequelize.define('cart',{
+const OrderModel = sequelize.define('order', {
     id: {
-        type: Sequelize.INTEGER,
         autoIncrement: true,
-        allowNull: false,
         primaryKey: true,
+        type: Sequelize.INTEGER,
+        allowNull: false
     }
 });
 
-module.exports = Cart;
+module.exports = OrderModel;
