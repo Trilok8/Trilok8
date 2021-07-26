@@ -1,4 +1,4 @@
-const Product = require('../models/productModel');
+const ProductModel = require('../models/productModel');
 
 exports.getAddProduct = (request,response, next) => {
     response.render('admin/edit-product',{
@@ -13,12 +13,9 @@ exports.postAddProduct = (request,response,next) => {
     const imageURL = request.body.imageURL;
     const price = request.body.price;
     const description = request.body.description;
-    request.user.createProduct({
-        title: title,
-        imageURL: imageURL,
-        price: price,
-        description: description
-    })
+    const product = new ProductModel(title,price,description,imageURL,null,request.user._id);
+    product
+    .save()
     .then(result => {
         response.redirect('/admin/admin-product-list');
     })
@@ -34,11 +31,9 @@ exports.getEditProduct = (request,response,next) => {
     {
         response.redirect('/');
     }
-    request.user
-    .getProducts({ where: { id: productID } })
-    // Product.findByPk(productID)
-    .then(products => {
-        const product = products[0];
+    ProductModel
+    .findById(productID)
+    .then(product => {
         if(!product) {
             response.redirect('/');
         }
@@ -61,14 +56,9 @@ exports.postEditProduct = (request,response,next) => {
     const updatedImageURL = request.body.imageURL;
     const updatedPrice = request.body.price;
     const updatedDescription = request.body.description;
-    Product.findByPk(productID)
-    .then(product => {
-        product.title = updatedTitle;
-        product.imageURL = updatedImageURL;
-        product.price = updatedPrice;
-        product.description = updatedDescription;
-        return product.save()
-    })
+    
+    const product = new ProductModel(updatedTitle, updatedPrice, updatedDescription,updatedImageURL, productID,request.user._id);
+    product.save()
     .then(result => {
         response.redirect('/admin/admin-product-list');
     })
@@ -78,9 +68,8 @@ exports.postEditProduct = (request,response,next) => {
 };
 
 exports.getAdminProductList = (request,response,next) => {
-    request.user
-    .getProducts()
-    // Product.findAll()
+    ProductModel
+    .fetchAll()
     .then(products => {
         response.render('admin/admin-product-list',{
             prods: products,
@@ -95,11 +84,8 @@ exports.getAdminProductList = (request,response,next) => {
 
 exports.postDeleteProduct = (request,response,next) => {
     const productID = request.body.productID;
-    Product.findByPk(productID)
-    .then(product => {
-        return product.destroy()
-    })
-    .then(result => {
+    ProductModel.deleteById(productID)
+    .then(() => {
         response.redirect('/admin/admin-product-list');
     })
     .catch(err => {
