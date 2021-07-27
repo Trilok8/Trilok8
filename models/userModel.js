@@ -47,37 +47,40 @@ class UserModel {
     };
 
     getCart() {
-        const db = getDb();        
+        
+      const db = getDb();
+        
+      const quantityMap = new Map();
 
-        // this.cart.items.filter(item => {
-        //   productModel.findById(item.productId.toString()).then(product => {
-        //     if(product) {
-        //     }
-        //     else {
-        //       this.deleteItemFromCart(item.productId);
-        //       return this.cart.items;
-        //     }
-        //   });
-        // });
+      const prodIds = this.cart.items.map(cp =>{
+          quantityMap.set(cp.productId.toString(),cp.quantity);
+          return cp.productId;
+      });
 
-        const productIds = this.cart.items.map(i => {
-          return i.productId;
-        });
-
-        return db
-          .collection('products')
-          .find({ _id: { $in: productIds } })
+      return db.collection("products")
+          .find({_id: {$in: prodIds}})
           .toArray()
           .then(products => {
-            return products.map(p => {
-              return {
-                ...p,
-                quantity: this.cart.items.find(i => {
-                  return i.productId.toString() === p._id.toString();
-                }).quantity
-              };
-            });
+              
+              //the deletion of all extra products will run parallel to each other and main program
+              if(products.length<prodIds.length){
+                  const productIds = products.map(p => p._id.toString());
+                  const deletedProdIds = prodIds.filter(id => !productIds.includes(id.toString()));
+                  deletedProdIds.forEach(id => {
+                      this.deleteItemFromCart(id)
+                          .catch(err => {console.log(err)});
+                  })
+              }
+              
+              return products.map(product => {
+                  const p = {...product,
+                      quantity: quantityMap.get(product._id.toString())};
+                  return p;
+              })
           })
+          .catch(err => {
+              console.log(err);
+          });
       }
 
       deleteItemFromCart(productId) {
