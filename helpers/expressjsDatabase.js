@@ -3,7 +3,7 @@ const MongoClient = mongodb.MongoClient;
 let _db;
 
 exports.mongoConnect = callback => {
-    MongoClient.connect('mongodb+srv://Trilok:boyapalli@expressjspractice.9juqf.mongodb.net/shop?retryWrites=true&w=majority')
+    MongoClient.connect('')
     .then(client => {
         _db = client.db();
         console.log('connected');
