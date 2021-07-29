@@ -3,8 +3,8 @@ const adminRoutes = require('./Routes/admin.js');
 const shopRoute = require('./Routes/shop.js');
 const path = require('path');
 const errorPageController = require('./controllers/errorController');
-const mongoConnect = require('./helpers/expressjsDatabase').mongoConnect;
 const User = require('./models/userModel');
+const mongoose = require('mongoose');
 
 const app = express();
 app.set('view engine', 'ejs');
@@ -13,9 +13,9 @@ app.use(express.urlencoded({extended: true}));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use((request, response, next) => {
-    User.findById('60fd8f30ff0518dc934fbc5a')
+    User.findById('61019ece1ec56beaaa8f2ba0')
     .then(user => {
-        request.user = new User(user.username, user.email, user.cart, user._id);
+        request.user = user;
         next();
     })
     .catch(err => {
@@ -32,6 +32,21 @@ app.get('/',(request,response,next) => {
     console.log('no page');
 });
 
-mongoConnect(() => {
+mongoose.connect('mongodb+srv://Trilok:boyapalli@expressjspractice.9juqf.mongodb.net/shop?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true })
+.then(result => {
+    User.findOne()
+    .then(user => {
+        if(!user) {
+            const user = new User({
+                name: 'Trilok',
+                email: 'trilok@gmail.com',
+                cart: { items: [] }
+            });
+            user.save()
+        }
+    });
     app.listen(3000);
+  })
+.catch(err => {
+    console.log(err);
 });

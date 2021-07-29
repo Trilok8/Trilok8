@@ -10,10 +10,16 @@ exports.getAddProduct = (request,response, next) => {
 
 exports.postAddProduct = (request,response,next) => {
     const title = request.body.title;
-    const imageURL = request.body.imageURL;
+    const imageurl = request.body.imageurl;
     const price = request.body.price;
     const description = request.body.description;
-    const product = new ProductModel(title,price,description,imageURL,null,request.user._id);
+    const product = new ProductModel({
+        title: title,
+        price: price,
+        description: description,
+        imageurl: imageurl,
+        userId: request.user
+    });
     product
     .save()
     .then(result => {
@@ -53,12 +59,18 @@ exports.getEditProduct = (request,response,next) => {
 exports.postEditProduct = (request,response,next) => {
     const productID = request.body.productID;
     const updatedTitle = request.body.title;
-    const updatedImageURL = request.body.imageURL;
+    const updatedImageURL = request.body.imageurl;
     const updatedPrice = request.body.price;
     const updatedDescription = request.body.description;
-    
-    const product = new ProductModel(updatedTitle, updatedPrice, updatedDescription,updatedImageURL, productID,request.user._id);
-    product.save()
+
+    ProductModel.findById(productID)
+    .then(product => {
+        product.title = updatedTitle;
+        product.description = updatedDescription;
+        product.price = updatedPrice;
+        product.imageurl = updatedImageURL;
+        return product.save();
+    })
     .then(result => {
         response.redirect('/admin/admin-product-list');
     })
@@ -69,7 +81,7 @@ exports.postEditProduct = (request,response,next) => {
 
 exports.getAdminProductList = (request,response,next) => {
     ProductModel
-    .fetchAll()
+    .find()
     .then(products => {
         response.render('admin/admin-product-list',{
             prods: products,
@@ -84,7 +96,7 @@ exports.getAdminProductList = (request,response,next) => {
 
 exports.postDeleteProduct = (request,response,next) => {
     const productID = request.body.productID;
-    ProductModel.deleteById(productID)
+    ProductModel.findByIdAndDelete(productID)
     .then(() => {
         response.redirect('/admin/admin-product-list');
     })
